@@ -197,7 +197,7 @@ export default function Dashboard() {
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+            initialView={window.innerWidth < 640 ? "dayGridDay" : "dayGridMonth"}
             locale={ptBrLocale}
             events={filteredEvents}
             eventClick={handleEventClick}
@@ -212,7 +212,7 @@ export default function Dashboard() {
             }}
             footerToolbar={{
               left: "today",
-              right: "dayGridMonth,dayGridWeek",
+              right: "dayGridMonth,dayGridWeek,dayGridDay",
             }}
             height="auto"
             contentHeight="auto"
