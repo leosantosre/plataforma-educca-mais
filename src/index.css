@@ -118,6 +118,31 @@
 
   .fc .fc-button {
     @apply rounded-lg font-medium text-sm;
+    padding: 0.3em 0.6em;
+  }
+
+  /* Mobile: smaller text and tighter layout */
+  @media (max-width: 640px) {
+    .fc .fc-toolbar {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .fc .fc-toolbar-title {
+      font-size: 1.1rem !important;
+    }
+    .fc .fc-button {
+      font-size: 0.75rem;
+      padding: 0.25em 0.5em;
+    }
+    .fc .fc-daygrid-event {
+      font-size: 0.7rem;
+    }
+    .fc .fc-col-header-cell-cushion {
+      font-size: 0.75rem;
+    }
+    .fc .fc-daygrid-day-number {
+      font-size: 0.8rem;
+    }
   }
 
   .fc .fc-filterMeus-button {
