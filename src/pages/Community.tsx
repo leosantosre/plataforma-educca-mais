@@ -63,6 +63,7 @@ export default function Community() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState<PeriodFilter>("all");
+  const [commentTexts, setCommentTexts] = useState<Map<string, string[]>>(new Map());
 
   const loadPosts = async () => {
     setLoading(true);
