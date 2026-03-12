@@ -37,12 +37,39 @@ export default function Dashboard() {
 
   const loadEvents = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("events")
-      .select("*, profiles:user_id(full_name, avatar_url)");
 
-    if (!error && data) {
-      const mapped: CalendarEvent[] = data.map((e: any) => ({
+    // Fetch events
+    const { data: eventsData, error: eventsError } = await supabase
+      .from("events")
+      .select("*");
+
+    if (eventsError) {
+      console.error("Error loading events:", eventsError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (!eventsData || eventsData.length === 0) {
+      console.log("No events found");
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
+    // Get unique user IDs and fetch their profiles
+    const userIds = [...new Set(eventsData.map((e) => e.user_id))];
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", userIds);
+
+    const profilesMap = new Map(
+      (profilesData || []).map((p) => [p.id, p])
+    );
+
+    const mapped: CalendarEvent[] = eventsData.map((e) => {
+      const profile = profilesMap.get(e.user_id);
+      return {
         id: e.id,
         title: e.title,
         start: e.start_time,
@@ -52,12 +79,13 @@ export default function Dashboard() {
           description: e.description,
           zoom_link: e.zoom_link,
           user_id: e.user_id,
-          organizer_name: e.profiles?.full_name || null,
-          organizer_avatar: e.profiles?.avatar_url || null,
+          organizer_name: profile?.full_name || null,
+          organizer_avatar: profile?.avatar_url || null,
         },
-      }));
-      setEvents(mapped);
-    }
+      };
+    });
+
+    setEvents(mapped);
     setLoading(false);
   };
 
