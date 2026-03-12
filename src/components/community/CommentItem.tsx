@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 
 interface CommentProfile {
   full_name: string | null;
