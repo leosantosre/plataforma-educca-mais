@@ -193,7 +193,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-card p-4 shadow-card">
+        <div className="rounded-xl border bg-card p-2 sm:p-4 shadow-card overflow-x-auto">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, interactionPlugin]}
@@ -202,15 +202,21 @@ export default function Dashboard() {
             events={filteredEvents}
             eventClick={handleEventClick}
             editable={false}
-            dayMaxEvents={3}
-            aspectRatio={1.6}
+            dayMaxEvents={2}
+            aspectRatio={1.0}
             customButtons={customButtons}
             headerToolbar={{
-              left: "prev,next today",
+              left: "prev,next",
               center: "title",
-              right: "filterMeus dayGridMonth,dayGridWeek",
+              right: "filterMeus",
+            }}
+            footerToolbar={{
+              left: "today",
+              right: "dayGridMonth,dayGridWeek",
             }}
             height="auto"
+            contentHeight="auto"
+            handleWindowResize={true}
           />
         </div>
       </div>

@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, GraduationCap, Users, User } from "lucide-react";
+import { LogOut, Calendar, GraduationCap, Users, User, Menu, X } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
 export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -23,11 +25,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <GraduationCap className="h-7 w-7 text-primary" />
           <span className="font-serif text-xl font-bold text-foreground">Educca<span className="text-primary">+</span></span>
         </Link>
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
           {user && (
             <>
@@ -43,13 +46,24 @@ export function Navbar() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <NotificationBell />
+
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden p-2 rounded-full hover:bg-accent transition-colors"
+                aria-label="Menu"
+              >
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+
+              {/* User dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-accent transition-colors cursor-pointer outline-none">
+                  <button className="hidden md:flex items-center gap-2 rounded-full px-2 py-1 hover:bg-accent transition-colors cursor-pointer outline-none">
                     {user.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} alt="" className="h-8 w-8 rounded-full ring-2 ring-primary/20" />
                     ) : (
@@ -57,7 +71,7 @@ export function Navbar() {
                         <User className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
-                    <span className="hidden sm:block text-sm font-medium text-foreground">
+                    <span className="hidden sm:block text-sm font-medium text-foreground max-w-[120px] truncate">
                       {user.user_metadata?.full_name || user.email}
                     </span>
                   </button>
@@ -82,6 +96,45 @@ export function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && user && (
+        <div className="md:hidden border-t bg-card">
+          <nav className="container py-3 flex flex-col gap-1">
+            <Link
+              to="/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+            >
+              <Calendar className="h-4 w-4" />
+              Dashboard
+            </Link>
+            <Link
+              to="/community"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+            >
+              <Users className="h-4 w-4" />
+              Comunidade
+            </Link>
+            <Link
+              to="/profile"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+            >
+              <User className="h-4 w-4" />
+              Perfil
+            </Link>
+            <button
+              onClick={() => { setMobileOpen(false); handleLogout(); }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors text-left"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </button>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
