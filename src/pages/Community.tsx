@@ -69,7 +69,7 @@ export default function Community() {
 
     const [postsRes, commentsRes] = await Promise.all([
       supabase.from("posts").select("*").order("created_at", { ascending: false }),
-      supabase.from("comments").select("id, post_id"),
+      supabase.from("comments").select("id, post_id, content"),
     ]);
 
     if (postsRes.error) {
