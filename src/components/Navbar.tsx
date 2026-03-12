@@ -32,6 +32,10 @@ export function Navbar() {
                 <Users className="h-4 w-4" />
                 Comunidade
               </Link>
+              <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <UserCircle className="h-4 w-4" />
+                Perfil
+              </Link>
             </>
           )}
         </nav>
