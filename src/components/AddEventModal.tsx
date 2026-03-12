@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Video } from "lucide-react";
 
 interface AddEventModalProps {
   open: boolean;
@@ -15,35 +15,36 @@ interface AddEventModalProps {
 }
 
 export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProps) {
-  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [zoomLink, setZoomLink] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
 
     setLoading(true);
-    const { error } = await supabase.from("events").insert({
-      title,
-      description: description || null,
-      zoom_link: zoomLink || null,
-      start_time: new Date(start).toISOString(),
-      end_time: new Date(end).toISOString(),
-      user_id: user.id,
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke("create-zoom-meeting", {
+        body: {
+          title,
+          description: description || null,
+          start_time: new Date(start).toISOString(),
+          end_time: new Date(end).toISOString(),
+        },
+      });
 
-    if (error) {
-      toast.error("Erro ao criar evento: " + error.message);
-    } else {
-      toast.success("Evento criado com sucesso!");
-      resetForm();
-      onEventAdded();
-      onClose();
+      if (error) {
+        toast.error("Erro ao criar evento: " + error.message);
+      } else {
+        toast.success("Workshop criado com reunião Zoom!");
+        resetForm();
+        onEventAdded();
+        onClose();
+      }
+    } catch (err: any) {
+      toast.error("Erro ao criar evento: " + (err.message || "Erro desconhecido"));
     }
     setLoading(false);
   };
@@ -51,7 +52,6 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setZoomLink("");
     setStart("");
     setEnd("");
   };
@@ -71,9 +71,9 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
             <Label htmlFor="description">Descrição</Label>
             <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreva seu workshop..." rows={3} />
           </div>
-          <div>
-            <Label htmlFor="zoom">Link do Zoom</Label>
-            <Input id="zoom" value={zoomLink} onChange={(e) => setZoomLink(e.target.value)} placeholder="https://zoom.us/j/..." />
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+            <Video className="h-4 w-4 text-primary" />
+            O link do Zoom será criado automaticamente
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -88,7 +88,7 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Criando..." : "Criar Evento"}
+              {loading ? "Criando..." : "Criar Workshop"}
             </Button>
           </DialogFooter>
         </form>
