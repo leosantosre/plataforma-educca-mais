@@ -212,7 +212,7 @@ export default function Dashboard() {
             }}
             footerToolbar={{
               left: "today",
-              right: "dayGridMonth,dayGridWeek",
+              right: "dayGridMonth,dayGridWeek,dayGridDay",
             }}
             height="auto"
             contentHeight="auto"
