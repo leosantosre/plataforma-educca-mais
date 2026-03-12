@@ -158,7 +158,7 @@ export default function Dashboard() {
 
   const customButtons = {
     filterMeus: {
-      text: filterMyEvents ? "✓ Meus Eventos" : "Meus Eventos",
+      text: "Meus eventos",
       click: () => {
         setFilterMyEvents((prev) => !prev);
       },
