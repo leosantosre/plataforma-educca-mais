@@ -140,15 +140,23 @@ export function NotificationBell() {
                     !n.is_read ? "bg-primary/5" : ""
                   }`}
                 >
-                  <div className="flex items-start gap-2">
-                    {!n.is_read && (
-                      <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-                    )}
-                    <div className={`flex-1 min-w-0 ${n.is_read ? "ml-4" : ""}`}>
-                      <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>
-                      <p className="text-[11px] text-muted-foreground/70 mt-1">{timeAgo(n.created_at)}</p>
-                    </div>
+                   <div className="flex items-start gap-2">
+                     {!n.is_read && (
+                       <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+                     )}
+                     <div className={`flex-1 min-w-0 ${n.is_read ? "ml-4" : ""}`}>
+                       <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
+                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>
+                       <p className="text-[11px] text-muted-foreground/70 mt-1">{timeAgo(n.created_at)}</p>
+                     </div>
+                     <button
+                       onClick={(e) => handleDelete(e, n.id)}
+                       className="mt-0.5 p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                       aria-label="Apagar notificação"
+                     >
+                       <X className="h-3.5 w-3.5" />
+                     </button>
+                   </div>
                   </div>
                 </button>
               ))
