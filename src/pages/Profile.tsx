@@ -95,7 +95,7 @@ export default function Profile() {
       .update({
         full_name: trimmedName,
         description: trimmedDesc,
-        education_level: educationLevel || null,
+        education_level: educationLevels.length > 0 ? educationLevels.join(", ") : null,
       } as any)
       .eq("id", user.id);
 
