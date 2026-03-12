@@ -129,6 +129,14 @@ export default function Dashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const el = (calendarRef.current?.getApi() as any).el;
+    const btn = el?.querySelector(".fc-filterMeus-button");
+    if (btn) {
+      btn.classList.toggle("fc-button-active", filterMyEvents);
+    }
+  }, [filterMyEvents]);
+
   const filteredEvents = filterMyEvents
     ? events.filter(
         (e) =>
@@ -158,7 +166,7 @@ export default function Dashboard() {
 
   const customButtons = {
     filterMeus: {
-      text: filterMyEvents ? "✓ Meus Eventos" : "Meus Eventos",
+      text: "Meus eventos",
       click: () => {
         setFilterMyEvents((prev) => !prev);
       },
