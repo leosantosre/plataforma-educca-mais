@@ -1,11 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, MessageSquare } from "lucide-react";
+import { Plus, MessageSquare, Search, SlidersHorizontal, X } from "lucide-react";
 import { CreatePostModal } from "@/components/community/CreatePostModal";
 import { PostDetail } from "@/components/community/PostDetail";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface PostListItem {
   id: string;
@@ -17,12 +25,44 @@ interface PostListItem {
   profile?: { full_name: string | null; avatar_url: string | null };
 }
 
+type PeriodFilter = "all" | "hour" | "today" | "week" | "month" | "year";
+
+const periodLabels: Record<PeriodFilter, string> = {
+  hour: "Da última hora",
+  today: "Hoje",
+  week: "Última semana",
+  month: "Último mês",
+  year: "Último ano",
+  all: "Desde sempre",
+};
+
+function getPeriodDate(period: PeriodFilter): Date | null {
+  const now = new Date();
+  switch (period) {
+    case "hour":
+      return new Date(now.getTime() - 60 * 60 * 1000);
+    case "today":
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    case "week":
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "month":
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "year":
+      return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    case "all":
+    default:
+      return null;
+  }
+}
+
 export default function Community() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [period, setPeriod] = useState<PeriodFilter>("all");
 
   const loadPosts = async () => {
     setLoading(true);
@@ -40,13 +80,11 @@ export default function Community() {
     const postsData = postsRes.data || [];
     const commentsData = commentsRes.data || [];
 
-    // Count comments per post
     const countMap = new Map<string, number>();
     for (const c of commentsData) {
       countMap.set(c.post_id, (countMap.get(c.post_id) || 0) + 1);
     }
 
-    // Fetch profiles
     const userIds = [...new Set(postsData.map((p) => p.user_id))];
     const { data: profiles } = userIds.length > 0
       ? await supabase.from("profiles").select("id, full_name, avatar_url").in("id", userIds)
@@ -75,6 +113,28 @@ export default function Community() {
 
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+
+    // Filter by period
+    const periodDate = getPeriodDate(period);
+    if (periodDate) {
+      result = result.filter((p) => new Date(p.created_at) >= periodDate);
+    }
+
+    // Filter by search
+    const term = search.trim().toLowerCase();
+    if (term) {
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(term) ||
+          p.content.toLowerCase().includes(term)
+      );
+    }
+
+    return result;
+  }, [posts, search, period]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -110,19 +170,70 @@ export default function Community() {
           </Button>
         </div>
 
+        {/* Search and filter bar */}
+        <div className="flex items-center gap-2 mb-5">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar discussões..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-8"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={period !== "all" ? "default" : "outline"}
+                size="sm"
+                className="gap-1.5 shrink-0"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {period === "all" ? "Período" : periodLabels[period]}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuRadioGroup value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
+                {(Object.keys(periodLabels) as PeriodFilter[]).map((key) => (
+                  <DropdownMenuRadioItem key={key} value={key}>
+                    {periodLabels[key]}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
-        ) : posts.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center py-16">
             <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-lg font-medium text-foreground mb-1">Nenhuma discussão ainda</h2>
-            <p className="text-sm text-muted-foreground">Seja o primeiro a criar uma discussão!</p>
+            <h2 className="text-lg font-medium text-foreground mb-1">
+              {search || period !== "all" ? "Nenhuma discussão encontrada" : "Nenhuma discussão ainda"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {search || period !== "all"
+                ? "Tente ajustar os filtros ou termos de pesquisa."
+                : "Seja o primeiro a criar uma discussão!"}
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {posts.map((post) => (
+            {filteredPosts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => setSelectedPostId(post.id)}
