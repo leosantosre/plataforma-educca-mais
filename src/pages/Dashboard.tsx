@@ -9,7 +9,7 @@ import { EventDetailsModal, EventDetails } from "@/components/EventDetailsModal"
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, RefreshCw, Filter } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 
 interface CalendarEvent {
   id: string;
