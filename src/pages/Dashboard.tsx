@@ -200,7 +200,7 @@ export default function Dashboard() {
             headerToolbar={{
               left: "prev,next today",
               center: "title",
-              right: "dayGridMonth,dayGridWeek filterMeus",
+              right: "filterMeus dayGridMonth,dayGridWeek",
             }}
             height="auto"
           />
