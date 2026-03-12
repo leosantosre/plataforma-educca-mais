@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, GraduationCap } from "lucide-react";
+import { LogOut, Calendar, GraduationCap, Users } from "lucide-react";
 
 export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
