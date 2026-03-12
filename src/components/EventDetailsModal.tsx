@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calendar, Clock, Video, User, Trash2 } from "lucide-react";
+import { Calendar, Clock, Video, User, Trash2, Users, UserPlus, UserMinus } from "lucide-react";
 
 export interface EventDetails {
   id: string;
@@ -15,6 +16,8 @@ export interface EventDetails {
   user_id: string;
   organizer_name: string | null;
   organizer_avatar: string | null;
+  participant_count: number;
+  is_participating: boolean;
 }
 
 interface EventDetailsModalProps {
@@ -22,10 +25,13 @@ interface EventDetailsModalProps {
   onClose: () => void;
   event: EventDetails | null;
   onEventDeleted: () => void;
+  onParticipationChanged: () => void;
 }
 
-export function EventDetailsModal({ open, onClose, event, onEventDeleted }: EventDetailsModalProps) {
+export function EventDetailsModal({ open, onClose, event, onEventDeleted, onParticipationChanged }: EventDetailsModalProps) {
   const { user } = useAuth();
+  const [joining, setJoining] = useState(false);
+
   if (!event) return null;
 
   const isOwner = user?.id === event.user_id;
@@ -38,6 +44,41 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted }: Even
     } else {
       toast.success("Evento deletado!");
       onEventDeleted();
+      onClose();
+    }
+  };
+
+  const handleJoin = async () => {
+    if (!user) return;
+    setJoining(true);
+    const { error } = await supabase.from("event_participants").insert({
+      event_id: event.id,
+      user_id: user.id,
+    });
+    setJoining(false);
+    if (error) {
+      toast.error("Erro ao participar: " + error.message);
+    } else {
+      toast.success("Participação confirmada!");
+      onParticipationChanged();
+      onClose();
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!user) return;
+    setJoining(true);
+    const { error } = await supabase
+      .from("event_participants")
+      .delete()
+      .eq("event_id", event.id)
+      .eq("user_id", user.id);
+    setJoining(false);
+    if (error) {
+      toast.error("Erro ao cancelar participação: " + error.message);
+    } else {
+      toast.success("Participação cancelada.");
+      onParticipationChanged();
       onClose();
     }
   };
@@ -57,6 +98,10 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted }: Even
               <span>Organizador: <strong className="text-foreground">{event.organizer_name}</strong></span>
             </div>
           )}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="h-4 w-4" />
+            <span><strong className="text-foreground">{event.participant_count}</strong> participante{event.participant_count !== 1 ? "s" : ""}</span>
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
             <span>{fmt(event.start_time)}</span>
@@ -80,8 +125,20 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted }: Even
             </a>
           )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={onClose}>Fechar</Button>
+          {!isOwner && !event.is_participating && (
+            <Button onClick={handleJoin} disabled={joining} className="gap-1">
+              <UserPlus className="h-4 w-4" />
+              {joining ? "Entrando..." : "Participar"}
+            </Button>
+          )}
+          {!isOwner && event.is_participating && (
+            <Button variant="secondary" onClick={handleLeave} disabled={joining} className="gap-1">
+              <UserMinus className="h-4 w-4" />
+              {joining ? "Saindo..." : "Cancelar participação"}
+            </Button>
+          )}
           {isOwner && (
             <Button variant="destructive" onClick={handleDelete} className="gap-1">
               <Trash2 className="h-4 w-4" />
