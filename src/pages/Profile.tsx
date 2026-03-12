@@ -38,7 +38,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [fullName, setFullName] = useState("");
   const [description, setDescription] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
+  const [educationLevels, setEducationLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
