@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, User } from "lucide-react";
+import { Save, User, GraduationCap, FileText } from "lucide-react";
 
 const EDUCATION_LEVELS = [
   "Educação Infantil",
@@ -21,8 +22,20 @@ const EDUCATION_LEVELS = [
   "Pós-Graduação",
 ] as const;
 
+interface ProfileData {
+  full_name: string | null;
+  avatar_url: string | null;
+  description: string | null;
+  education_level: string | null;
+}
+
 export default function Profile() {
   const { user } = useAuth();
+  const { userId } = useParams<{ userId?: string }>();
+  const viewingUserId = userId || user?.id;
+  const isOwnProfile = !userId || userId === user?.id;
+
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [fullName, setFullName] = useState("");
   const [description, setDescription] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
@@ -30,25 +43,30 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!viewingUserId) return;
 
     const fetchProfile = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, description, education_level")
-        .eq("id", user.id)
+        .select("full_name, avatar_url, description, education_level")
+        .eq("id", viewingUserId)
         .single();
 
       if (!error && data) {
-        setFullName(data.full_name || "");
-        setDescription((data as any).description || "");
-        setEducationLevel((data as any).education_level || "");
+        const d = data as any;
+        setProfile({ full_name: d.full_name, avatar_url: d.avatar_url, description: d.description, education_level: d.education_level });
+        if (isOwnProfile) {
+          setFullName(d.full_name || "");
+          setDescription(d.description || "");
+          setEducationLevel(d.education_level || "");
+        }
       }
       setLoading(false);
     };
 
     fetchProfile();
-  }, [user]);
+  }, [viewingUserId, isOwnProfile]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -95,6 +113,47 @@ export default function Profile() {
         <div className="flex items-center justify-center py-20">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
         </div>
+      </div>
+    );
+  }
+
+  // View-only profile for other users
+  if (!isOwnProfile && profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container max-w-2xl py-10">
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarFallback>
+                  <User className="h-8 w-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl">{profile.full_name || "Usuário"}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {profile.description && (
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{profile.description}</p>
+                </div>
+              )}
+              {profile.education_level && (
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-foreground">{profile.education_level}</span>
+                </div>
+              )}
+              {!profile.description && !profile.education_level && (
+                <p className="text-sm text-muted-foreground">Este usuário ainda não preencheu seu perfil.</p>
+              )}
+            </CardContent>
+          </Card>
+        </main>
       </div>
     );
   }

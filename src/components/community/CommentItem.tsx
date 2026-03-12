@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 
 interface CommentProfile {
   full_name: string | null;
@@ -88,7 +89,7 @@ export function CommentItem({ comment, postId, onCommentChanged, isReply = false
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium text-foreground">{comment.profile?.full_name || "Usuário"}</span>
+            <UserLink userId={comment.user_id} name={comment.profile?.full_name || null} className="font-medium text-foreground" />
             <span className="text-muted-foreground text-xs">· {timeAgo(comment.created_at)}</span>
           </div>
           <p className="text-sm text-foreground mt-1 whitespace-pre-wrap break-words">{comment.content}</p>

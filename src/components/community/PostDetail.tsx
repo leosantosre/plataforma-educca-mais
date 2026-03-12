@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, MessageSquare } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 import { CommentItem, CommentData } from "./CommentItem";
 
 interface PostData {
@@ -177,7 +178,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
           <div className="flex-1 min-w-0">
             <h1 className="font-serif text-xl font-bold text-foreground">{post.title}</h1>
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-              <span>{post.profile?.full_name || "Usuário"}</span>
+              <UserLink userId={post.user_id} name={post.profile?.full_name || null} />
               <span>· {timeAgo(post.created_at)}</span>
             </div>
             <p className="mt-4 text-foreground whitespace-pre-wrap break-words">{post.content}</p>

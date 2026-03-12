@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar, Clock, Video, User, Trash2, Users, UserPlus, UserMinus } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 
 export interface EventDetails {
   id: string;
@@ -95,7 +96,7 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted, onPart
           {event.organizer_name && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
-              <span>Organizador: <strong className="text-foreground">{event.organizer_name}</strong></span>
+              <span>Organizador: <UserLink userId={event.user_id} name={event.organizer_name} className="font-semibold text-foreground" /></span>
             </div>
           )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

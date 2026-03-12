@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, MessageSquare, Search, SlidersHorizontal, X } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 import { CreatePostModal } from "@/components/community/CreatePostModal";
 import { PostDetail } from "@/components/community/PostDetail";
 import {
@@ -256,7 +257,7 @@ export default function Community() {
                     <h3 className="font-semibold text-foreground truncate">{post.title}</h3>
                     <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{post.content}</p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <span>{post.profile?.full_name || "Usuário"}</span>
+                      <UserLink userId={post.user_id} name={post.profile?.full_name || null} />
                       <span>· {timeAgo(post.created_at)}</span>
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
