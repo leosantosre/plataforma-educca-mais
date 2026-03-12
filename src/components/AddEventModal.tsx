@@ -36,14 +36,17 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
       });
 
       if (error) {
-        toast.error("Erro ao criar evento: " + error.message);
+        console.error("Edge function error:", error);
+        toast.error("Erro ao criar evento: " + (error.message || JSON.stringify(error)));
       } else {
+        console.log("Event created successfully:", data);
         toast.success("Workshop criado com reunião Zoom!");
         resetForm();
         onEventAdded();
         onClose();
       }
     } catch (err: any) {
+      console.error("Catch error:", err);
       toast.error("Erro ao criar evento: " + (err.message || "Erro desconhecido"));
     }
     setLoading(false);
