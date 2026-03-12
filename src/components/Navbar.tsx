@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, GraduationCap, Users } from "lucide-react";
+import { LogOut, Calendar, GraduationCap, Users, UserCircle } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 export function Navbar() {
@@ -31,6 +31,10 @@ export function Navbar() {
               <Link to="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 Comunidade
+              </Link>
+              <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <UserCircle className="h-4 w-4" />
+                Perfil
               </Link>
             </>
           )}
