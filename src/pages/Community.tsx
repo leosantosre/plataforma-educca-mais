@@ -63,13 +63,14 @@ export default function Community() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState<PeriodFilter>("all");
+  const [commentTexts, setCommentTexts] = useState<Map<string, string[]>>(new Map());
 
   const loadPosts = async () => {
     setLoading(true);
 
     const [postsRes, commentsRes] = await Promise.all([
       supabase.from("posts").select("*").order("created_at", { ascending: false }),
-      supabase.from("comments").select("id, post_id"),
+      supabase.from("comments").select("id, post_id, content"),
     ]);
 
     if (postsRes.error) {
@@ -81,8 +82,12 @@ export default function Community() {
     const commentsData = commentsRes.data || [];
 
     const countMap = new Map<string, number>();
+    const commentsByPost = new Map<string, string[]>();
     for (const c of commentsData) {
       countMap.set(c.post_id, (countMap.get(c.post_id) || 0) + 1);
+      const arr = commentsByPost.get(c.post_id) || [];
+      arr.push((c.content || "").toLowerCase());
+      commentsByPost.set(c.post_id, arr);
     }
 
     const userIds = [...new Set(postsData.map((p) => p.user_id))];
@@ -99,6 +104,7 @@ export default function Community() {
     }));
 
     setPosts(mapped);
+    setCommentTexts(commentsByPost);
     setLoading(false);
   };
 
@@ -129,12 +135,13 @@ export default function Community() {
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(term) ||
-          p.content.toLowerCase().includes(term)
+          p.content.toLowerCase().includes(term) ||
+          (commentTexts.get(p.id) || []).some((c) => c.includes(term))
       );
     }
 
     return result;
-  }, [posts, search, period]);
+  }, [posts, search, period, commentTexts]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
