@@ -37,6 +37,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [filterMyEvents, setFilterMyEvents] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const loadEvents = async () => {
     setLoading(true);
