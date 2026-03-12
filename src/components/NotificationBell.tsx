@@ -157,7 +157,6 @@ export function NotificationBell() {
                        <X className="h-3.5 w-3.5" />
                      </button>
                    </div>
-                  </div>
                 </button>
               ))
             )}
