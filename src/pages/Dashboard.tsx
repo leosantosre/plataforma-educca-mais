@@ -9,7 +9,7 @@ import { EventDetailsModal, EventDetails } from "@/components/EventDetailsModal"
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Filter } from "lucide-react";
 
 interface CalendarEvent {
   id: string;
@@ -23,6 +23,8 @@ interface CalendarEvent {
     user_id: string;
     organizer_name: string | null;
     organizer_avatar: string | null;
+    participant_count: number;
+    is_participating: boolean;
   };
 }
 
@@ -33,30 +35,41 @@ export default function Dashboard() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const [filterMyEvents, setFilterMyEvents] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
 
   const loadEvents = async () => {
     setLoading(true);
 
-    // Fetch events
-    const { data: eventsData, error: eventsError } = await supabase
-      .from("events")
-      .select("*");
+    const [eventsRes, participantsRes] = await Promise.all([
+      supabase.from("events").select("*"),
+      supabase.from("event_participants").select("*"),
+    ]);
 
-    if (eventsError) {
-      console.error("Error loading events:", eventsError.message);
+    if (eventsRes.error) {
+      console.error("Error loading events:", eventsRes.error.message);
       setLoading(false);
       return;
     }
 
-    if (!eventsData || eventsData.length === 0) {
-      console.log("No events found");
+    const eventsData = eventsRes.data || [];
+    const participantsData = participantsRes.data || [];
+
+    if (eventsData.length === 0) {
       setEvents([]);
       setLoading(false);
       return;
     }
 
-    // Get unique user IDs and fetch their profiles
+    // Build participant counts and user participation map
+    const countMap = new Map<string, number>();
+    const userParticipation = new Set<string>();
+    for (const p of participantsData) {
+      countMap.set(p.event_id, (countMap.get(p.event_id) || 0) + 1);
+      if (p.user_id === user?.id) userParticipation.add(p.event_id);
+    }
+
+    // Fetch profiles
     const userIds = [...new Set(eventsData.map((e) => e.user_id))];
     const { data: profilesData } = await supabase
       .from("profiles")
@@ -69,9 +82,12 @@ export default function Dashboard() {
 
     const mapped: CalendarEvent[] = eventsData.map((e) => {
       const profile = profilesMap.get(e.user_id);
+      // Count = participants + 1 (organizer always counts)
+      const participantCount = (countMap.get(e.id) || 0) + 1;
+      const isParticipating = userParticipation.has(e.id);
       return {
         id: e.id,
-        title: e.title,
+        title: `${e.title} (${participantCount})`,
         start: e.start_time,
         end: e.end_time,
         classNames: [e.user_id === user?.id ? "fc-event-own" : "fc-event-other"],
@@ -81,6 +97,8 @@ export default function Dashboard() {
           user_id: e.user_id,
           organizer_name: profile?.full_name || null,
           organizer_avatar: profile?.avatar_url || null,
+          participant_count: participantCount,
+          is_participating: isParticipating,
         },
       };
     });
@@ -97,9 +115,12 @@ export default function Dashboard() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "events" },
-        () => {
-          loadEvents();
-        }
+        () => loadEvents()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "event_participants" },
+        () => loadEvents()
       )
       .subscribe();
 
@@ -108,11 +129,19 @@ export default function Dashboard() {
     };
   }, []);
 
+  const filteredEvents = filterMyEvents
+    ? events.filter(
+        (e) =>
+          e.extendedProps.user_id === user?.id ||
+          e.extendedProps.is_participating
+      )
+    : events;
+
   const handleEventClick = (info: any) => {
     const props = info.event.extendedProps;
     setSelectedEvent({
       id: info.event.id,
-      title: info.event.title,
+      title: info.event.title.replace(/\s*\(\d+\)$/, ""),
       start_time: info.event.startStr,
       end_time: info.event.endStr,
       description: props.description,
@@ -120,6 +149,8 @@ export default function Dashboard() {
       user_id: props.user_id,
       organizer_name: props.organizer_name,
       organizer_avatar: props.organizer_avatar,
+      participant_count: props.participant_count,
+      is_participating: props.is_participating,
     });
     setDetailsOpen(true);
   };
@@ -133,6 +164,17 @@ export default function Dashboard() {
             Meus Workshops
           </h1>
           <div className="flex gap-2">
+            <Button
+              variant={filterMyEvents ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterMyEvents(!filterMyEvents)}
+              className="gap-1"
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {filterMyEvents ? "Todos" : "Meus"}
+              </span>
+            </Button>
             <Button variant="outline" size="sm" onClick={loadEvents} disabled={loading} className="gap-1">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Atualizar</span>
@@ -150,7 +192,7 @@ export default function Dashboard() {
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             locale={ptBrLocale}
-            events={events}
+            events={filteredEvents}
             eventClick={handleEventClick}
             editable={false}
             dayMaxEvents={3}
@@ -171,6 +213,7 @@ export default function Dashboard() {
         onClose={() => setDetailsOpen(false)}
         event={selectedEvent}
         onEventDeleted={loadEvents}
+        onParticipationChanged={loadEvents}
       />
     </div>
   );
