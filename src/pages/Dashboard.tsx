@@ -155,7 +155,6 @@ export default function Dashboard() {
     setDetailsOpen(true);
   };
 
-  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const customButtons = {
     filterMeus: {
