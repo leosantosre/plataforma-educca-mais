@@ -155,6 +155,17 @@ export default function Dashboard() {
     setDetailsOpen(true);
   };
 
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const customButtons = {
+    filterMeus: {
+      text: filterMyEvents ? "✓ Meus Eventos" : "Meus Eventos",
+      click: () => {
+        setFilterMyEvents((prev) => !prev);
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -164,17 +175,6 @@ export default function Dashboard() {
             Meus Workshops
           </h1>
           <div className="flex gap-2">
-            <Button
-              variant={filterMyEvents ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilterMyEvents(!filterMyEvents)}
-              className="gap-1"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {filterMyEvents ? "Todos" : "Meus"}
-              </span>
-            </Button>
             <Button variant="outline" size="sm" onClick={loadEvents} disabled={loading} className="gap-1">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Atualizar</span>
@@ -197,10 +197,11 @@ export default function Dashboard() {
             editable={false}
             dayMaxEvents={3}
             aspectRatio={1.6}
+            customButtons={customButtons}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
-              right: "dayGridMonth,dayGridWeek",
+              right: "dayGridMonth,dayGridWeek filterMeus",
             }}
             height="auto"
           />
