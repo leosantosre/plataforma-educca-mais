@@ -2,3 +2,6 @@ project_id = "orcfyaeegfgkblyhduen"
 
 [functions.create-zoom-meeting]
 verify_jwt = false
+
+[functions.generate-event-notifications]
+verify_jwt = false
