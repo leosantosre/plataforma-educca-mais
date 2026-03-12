@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, GraduationCap } from "lucide-react";
+import { LogOut, Calendar, GraduationCap, Users } from "lucide-react";
 
 export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
@@ -22,10 +22,16 @@ export function Navbar() {
 
         <nav className="hidden md:flex items-center gap-8">
           {user && (
-            <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Dashboard
-            </Link>
+            <>
+              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Dashboard
+              </Link>
+              <Link to="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                Comunidade
+              </Link>
+            </>
           )}
         </nav>
 
