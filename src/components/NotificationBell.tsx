@@ -71,6 +71,12 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
   };
 
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    await supabase.from("notifications").delete().eq("id", id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   const handleClick = async (n: Notification) => {
     if (!n.is_read) {
       await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
