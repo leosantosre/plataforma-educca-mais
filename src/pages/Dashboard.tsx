@@ -129,6 +129,14 @@ export default function Dashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const el = calendarRef.current?.getApi().el;
+    const btn = el?.querySelector(".fc-filterMeus-button");
+    if (btn) {
+      btn.classList.toggle("fc-button-active", filterMyEvents);
+    }
+  }, [filterMyEvents]);
+
   const filteredEvents = filterMyEvents
     ? events.filter(
         (e) =>
