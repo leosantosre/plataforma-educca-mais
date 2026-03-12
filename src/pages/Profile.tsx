@@ -55,11 +55,13 @@ export default function Profile() {
 
       if (!error && data) {
         const d = data as any;
+        const rawLevel = d.education_level || "";
+        const levels = rawLevel ? rawLevel.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
         setProfile({ full_name: d.full_name, avatar_url: d.avatar_url, description: d.description, education_level: d.education_level });
         if (isOwnProfile) {
           setFullName(d.full_name || "");
           setDescription(d.description || "");
-          setEducationLevel(d.education_level || "");
+          setEducationLevels(levels);
         }
       }
       setLoading(false);
