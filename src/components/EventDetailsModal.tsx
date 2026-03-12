@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar, Clock, Video, User, Trash2, Users, UserPlus, UserMinus } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 
 export interface EventDetails {
   id: string;
