@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, MessageSquare, Search, SlidersHorizontal, X } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 import { CreatePostModal } from "@/components/community/CreatePostModal";
 import { PostDetail } from "@/components/community/PostDetail";
 import {
