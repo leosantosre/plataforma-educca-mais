@@ -135,12 +135,13 @@ export default function Community() {
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(term) ||
-          p.content.toLowerCase().includes(term)
+          p.content.toLowerCase().includes(term) ||
+          (commentTexts.get(p.id) || []).some((c) => c.includes(term))
       );
     }
 
     return result;
-  }, [posts, search, period]);
+  }, [posts, search, period, commentTexts]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
