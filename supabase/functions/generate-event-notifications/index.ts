@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const now = new Date();
+  console.log("Running event notifications check at", now.toISOString());
 
   // 1-day reminder: events starting between 23h50m and 24h10m from now
   const dayStart = new Date(now.getTime() + 23 * 60 * 60 * 1000 + 50 * 60 * 1000);
