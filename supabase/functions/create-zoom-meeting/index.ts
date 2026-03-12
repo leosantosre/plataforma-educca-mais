@@ -47,7 +47,7 @@ async function createZoomMeeting(
     },
     body: JSON.stringify({
       topic,
-      type: 2, // Scheduled meeting
+      type: 2,
       start_time: startTime,
       duration,
       timezone: "UTC",
@@ -73,7 +73,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
@@ -88,18 +87,15 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Auth error:", userError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = claimsData.claims.sub;
-
-    // Parse request body
     const { title, description, start_time, end_time } = await req.json();
 
     if (!title || !start_time || !end_time) {
@@ -109,7 +105,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Calculate duration in minutes
     const startDate = new Date(start_time);
     const endDate = new Date(end_time);
     const durationMinutes = Math.max(
@@ -117,7 +112,8 @@ Deno.serve(async (req) => {
       Math.round((endDate.getTime() - startDate.getTime()) / 60000)
     );
 
-    // Create Zoom meeting
+    console.log("Creating Zoom meeting:", { title, start_time: startDate.toISOString(), duration: durationMinutes });
+
     const accessToken = await getZoomAccessToken();
     const meeting = await createZoomMeeting(
       accessToken,
@@ -126,7 +122,8 @@ Deno.serve(async (req) => {
       durationMinutes
     );
 
-    // Insert event into database
+    console.log("Zoom meeting created:", meeting.id);
+
     const { data: event, error: insertError } = await supabase
       .from("events")
       .insert({
@@ -135,23 +132,27 @@ Deno.serve(async (req) => {
         zoom_link: meeting.join_url,
         start_time: startDate.toISOString(),
         end_time: endDate.toISOString(),
-        user_id: userId,
+        user_id: user.id,
       })
       .select()
       .single();
 
     if (insertError) {
+      console.error("DB insert error:", insertError.message);
       return new Response(
         JSON.stringify({ error: "Failed to save event: " + insertError.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    console.log("Event saved:", event.id);
+
     return new Response(
       JSON.stringify({ event, zoom_join_url: meeting.join_url, zoom_start_url: meeting.start_url }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    console.error("Function error:", err.message);
     return new Response(
       JSON.stringify({ error: err.message || "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
