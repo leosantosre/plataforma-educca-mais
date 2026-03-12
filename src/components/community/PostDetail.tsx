@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, MessageSquare } from "lucide-react";
+import { UserLink } from "@/components/UserLink";
 import { CommentItem, CommentData } from "./CommentItem";
 
 interface PostData {
