@@ -63,6 +63,21 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadEvents();
+
+    const channel = supabase
+      .channel("events-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "events" },
+        () => {
+          loadEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleEventClick = (info: any) => {
