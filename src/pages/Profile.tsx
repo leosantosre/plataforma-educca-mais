@@ -204,20 +204,23 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="educationLevel">Nível de escolaridade que leciona</Label>
-              <Select value={educationLevel} onValueChange={setEducationLevel}>
-                <SelectTrigger id="educationLevel">
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EDUCATION_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-3">
+              <Label>Nível de escolaridade que leciona</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {EDUCATION_LEVELS.map((level) => (
+                  <label key={level} className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={educationLevels.includes(level)}
+                      onCheckedChange={(checked) => {
+                        setEducationLevels((prev) =>
+                          checked ? [...prev, level] : prev.filter((l) => l !== level)
+                        );
+                      }}
+                    />
+                    <span className="text-sm">{level}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
