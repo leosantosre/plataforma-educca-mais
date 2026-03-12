@@ -50,7 +50,7 @@ async function createZoomMeeting(
       type: 2, // Scheduled meeting
       start_time: startTime,
       duration,
-      timezone: "America/Sao_Paulo",
+      timezone: "UTC",
       settings: {
         join_before_host: true,
         waiting_room: false,
