@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -37,6 +37,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [filterMyEvents, setFilterMyEvents] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const loadEvents = async () => {
     setLoading(true);
@@ -194,48 +201,30 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border bg-card p-2 sm:p-4 shadow-card overflow-x-auto">
-          {(() => {
-            const isMobile = window.innerWidth < 640;
-            return (
-              <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, interactionPlugin]}
-                initialView={isMobile ? "dayGridDay" : "dayGridMonth"}
-                locale={ptBrLocale}
-                events={filteredEvents}
-                eventClick={handleEventClick}
-                editable={false}
-                dayMaxEvents={2}
-                aspectRatio={1.0}
-                customButtons={customButtons}
-                headerToolbar={isMobile
-                  ? {
-                      left: "title",
-                      center: "",
-                      right: "",
-                    }
-                  : {
-                      left: "prev,next",
-                      center: "title",
-                      right: "filterMeus",
-                    }
-                }
-                footerToolbar={isMobile
-                  ? {
-                      left: "prev,next today",
-                      right: "filterMeus",
-                    }
-                  : {
-                      left: "today",
-                      right: "dayGridMonth,dayGridWeek,dayGridDay",
-                    }
-                }
-                height="auto"
-                contentHeight="auto"
-                handleWindowResize={true}
-              />
-            );
-          })()}
+          <FullCalendar
+            key={isMobile ? "mobile" : "desktop"}
+            ref={calendarRef}
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView={isMobile ? "dayGridDay" : "dayGridMonth"}
+            locale={ptBrLocale}
+            events={filteredEvents}
+            eventClick={handleEventClick}
+            editable={false}
+            dayMaxEvents={2}
+            aspectRatio={1.0}
+            customButtons={customButtons}
+            headerToolbar={isMobile
+              ? { left: "title", center: "", right: "" }
+              : { left: "prev,next", center: "title", right: "filterMeus" }
+            }
+            footerToolbar={isMobile
+              ? { left: "prev,next today", right: "filterMeus" }
+              : { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
+            }
+            height="auto"
+            contentHeight="auto"
+            handleWindowResize={true}
+          />
         </div>
       </div>
 
