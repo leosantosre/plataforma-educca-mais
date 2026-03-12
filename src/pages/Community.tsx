@@ -81,8 +81,12 @@ export default function Community() {
     const commentsData = commentsRes.data || [];
 
     const countMap = new Map<string, number>();
+    const commentsByPost = new Map<string, string[]>();
     for (const c of commentsData) {
       countMap.set(c.post_id, (countMap.get(c.post_id) || 0) + 1);
+      const arr = commentsByPost.get(c.post_id) || [];
+      arr.push((c.content || "").toLowerCase());
+      commentsByPost.set(c.post_id, arr);
     }
 
     const userIds = [...new Set(postsData.map((p) => p.user_id))];
