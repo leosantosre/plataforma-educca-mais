@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Save, User, GraduationCap, FileText } from "lucide-react";
 
@@ -38,7 +38,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [fullName, setFullName] = useState("");
   const [description, setDescription] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
+  const [educationLevels, setEducationLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -55,11 +55,13 @@ export default function Profile() {
 
       if (!error && data) {
         const d = data as any;
+        const rawLevel = d.education_level || "";
+        const levels = rawLevel ? rawLevel.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
         setProfile({ full_name: d.full_name, avatar_url: d.avatar_url, description: d.description, education_level: d.education_level });
         if (isOwnProfile) {
           setFullName(d.full_name || "");
           setDescription(d.description || "");
-          setEducationLevel(d.education_level || "");
+          setEducationLevels(levels);
         }
       }
       setLoading(false);
@@ -93,7 +95,7 @@ export default function Profile() {
       .update({
         full_name: trimmedName,
         description: trimmedDesc,
-        education_level: educationLevel || null,
+        education_level: educationLevels.length > 0 ? educationLevels.join(", ") : null,
       } as any)
       .eq("id", user.id);
 
@@ -202,20 +204,23 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="educationLevel">Nível de escolaridade que leciona</Label>
-              <Select value={educationLevel} onValueChange={setEducationLevel}>
-                <SelectTrigger id="educationLevel">
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EDUCATION_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-3">
+              <Label>Nível de escolaridade que leciona</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {EDUCATION_LEVELS.map((level) => (
+                  <label key={level} className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={educationLevels.includes(level)}
+                      onCheckedChange={(checked) => {
+                        setEducationLevels((prev) =>
+                          checked ? [...prev, level] : prev.filter((l) => l !== level)
+                        );
+                      }}
+                    />
+                    <span className="text-sm">{level}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
