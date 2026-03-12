@@ -104,6 +104,7 @@ export default function Community() {
     }));
 
     setPosts(mapped);
+    setCommentTexts(commentsByPost);
     setLoading(false);
   };
 
