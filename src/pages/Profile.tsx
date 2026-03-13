@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Save, User, GraduationCap, FileText } from "lucide-react";
+import { Save, User, GraduationCap, FileText, Trash2 } from "lucide-react";
 import { ProfileWorkshops } from "@/components/profile/ProfileWorkshops";
 
 const EDUCATION_LEVELS = [
