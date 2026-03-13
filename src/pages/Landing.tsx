@@ -13,8 +13,8 @@ const features = [
   },
   {
     icon: Video,
-    title: "Integração com Zoom",
-    description: "Adicione links do Zoom diretamente nos seus eventos. Seus participantes terão acesso fácil às reuniões.",
+    title: "Videoconferência Integrada",
+    description: "Adicione links de videoconferência diretamente nos seus eventos. Seus participantes terão acesso fácil às reuniões.",
   },
   {
     icon: Users,
