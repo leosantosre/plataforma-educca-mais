@@ -25,6 +25,7 @@ interface PostDetailProps {
 
 export function PostDetail({ postId, onBack }: PostDetailProps) {
   const { user } = useAuth();
+  const { adminMode } = useAdmin();
   const [post, setPost] = useState<PostData | null>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [newComment, setNewComment] = useState("");
