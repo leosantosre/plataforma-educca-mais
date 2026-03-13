@@ -16,6 +16,7 @@ import {
 
 export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
+  const { isAdmin, adminMode, toggleAdminMode } = useAdmin();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
