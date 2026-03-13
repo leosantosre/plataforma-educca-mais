@@ -143,7 +143,7 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted, onPart
               {joining ? "Saindo..." : "Cancelar participação"}
             </Button>
           )}
-          {isOwner && (
+          {canDelete && (
             <Button variant="destructive" onClick={handleDelete} className="gap-1">
               <Trash2 className="h-4 w-4" />
               Deletar
