@@ -32,6 +32,7 @@ interface CommentItemProps {
 
 export function CommentItem({ comment, postId, onCommentChanged, isReply = false }: CommentItemProps) {
   const { user } = useAuth();
+  const { adminMode } = useAdmin();
   const [replying, setReplying] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
