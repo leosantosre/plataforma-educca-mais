@@ -213,6 +213,7 @@ export default function Dashboard() {
             dayMaxEvents={2}
             aspectRatio={1.0}
             customButtons={customButtons}
+            titleFormat={isMobile ? { day: '2-digit', month: '2-digit', year: 'numeric' } : undefined}
             headerToolbar={isMobile ?
             { left: "prev,next today", center: "title", right: "filterMeus" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
