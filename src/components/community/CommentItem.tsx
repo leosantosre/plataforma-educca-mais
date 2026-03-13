@@ -111,7 +111,7 @@ export function CommentItem({ comment, postId, onCommentChanged, isReply = false
       </div>
 
       {replying && (
-        <div className="ml-10 mb-2 flex gap-2">
+        <div className="ml-10 mb-2 flex flex-col gap-2">
           <Textarea
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
@@ -120,7 +120,7 @@ export function CommentItem({ comment, postId, onCommentChanged, isReply = false
             maxLength={2000}
             className="text-sm"
           />
-          <div className="flex flex-col gap-1">
+          <div className="flex gap-2">
             <Button size="sm" onClick={handleReply} disabled={submitting || !replyContent.trim()}>
               {submitting ? "..." : "Enviar"}
             </Button>
