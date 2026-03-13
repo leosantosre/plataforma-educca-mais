@@ -124,7 +124,8 @@
   /* Mobile: compact toolbar and calendar */
   @media (max-width: 640px) {
     .fc .fc-header-toolbar {
-      flex-wrap: wrap;
+      display: flex;
+      flex-wrap: wrap !important;
       gap: 0.25rem;
       justify-content: space-between;
     }
@@ -132,9 +133,12 @@
       display: flex;
       align-items: center;
     }
+    .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(1) { order: 1; }
+    .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(3) { order: 2; }
     .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
-      order: 3;
-      width: 100%;
+      order: 3 !important;
+      flex-basis: 100% !important;
+      width: 100% !important;
       justify-content: center;
       margin-top: 0.25rem;
     }
