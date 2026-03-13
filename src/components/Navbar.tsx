@@ -106,7 +106,7 @@ export function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && user && (
         <div className="md:hidden border-t bg-card">
-          <nav className="container py-3 flex flex-col gap-1">
+          <nav className="container py-3 flex flex-col gap-4">
             <Link
               to="/dashboard"
               onClick={() => setMobileOpen(false)}
