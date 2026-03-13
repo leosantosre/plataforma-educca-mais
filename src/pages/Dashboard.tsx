@@ -49,9 +49,9 @@ export default function Dashboard() {
     setLoading(true);
 
     const [eventsRes, participantsRes] = await Promise.all([
-      supabase.from("events").select("*"),
-      supabase.from("event_participants").select("*"),
-    ]);
+    supabase.from("events").select("*"),
+    supabase.from("event_participants").select("*")]
+    );
 
     if (eventsRes.error) {
       console.error("Error loading events:", eventsRes.error.message);
@@ -78,10 +78,10 @@ export default function Dashboard() {
 
     // Fetch profiles
     const userIds = [...new Set(eventsData.map((e) => e.user_id))];
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("id", userIds);
+    const { data: profilesData } = await supabase.
+    from("profiles").
+    select("id, full_name, avatar_url").
+    in("id", userIds);
 
     const profilesMap = new Map(
       (profilesData || []).map((p) => [p.id, p])
@@ -105,8 +105,8 @@ export default function Dashboard() {
           organizer_name: profile?.full_name || null,
           organizer_avatar: profile?.avatar_url || null,
           participant_count: participantCount,
-          is_participating: isParticipating,
-        },
+          is_participating: isParticipating
+        }
       };
     });
 
@@ -117,19 +117,19 @@ export default function Dashboard() {
   useEffect(() => {
     loadEvents();
 
-    const channel = supabase
-      .channel("events-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "events" },
-        () => loadEvents()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "event_participants" },
-        () => loadEvents()
-      )
-      .subscribe();
+    const channel = supabase.
+    channel("events-realtime").
+    on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "events" },
+      () => loadEvents()
+    ).
+    on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "event_participants" },
+      () => loadEvents()
+    ).
+    subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -144,13 +144,13 @@ export default function Dashboard() {
     }
   }, [filterMyEvents]);
 
-  const filteredEvents = filterMyEvents
-    ? events.filter(
-        (e) =>
-          e.extendedProps.user_id === user?.id ||
-          e.extendedProps.is_participating
-      )
-    : events;
+  const filteredEvents = filterMyEvents ?
+  events.filter(
+    (e) =>
+    e.extendedProps.user_id === user?.id ||
+    e.extendedProps.is_participating
+  ) :
+  events;
 
   const handleEventClick = (info: any) => {
     const props = info.event.extendedProps;
@@ -165,7 +165,7 @@ export default function Dashboard() {
       organizer_name: props.organizer_name,
       organizer_avatar: props.organizer_avatar,
       participant_count: props.participant_count,
-      is_participating: props.is_participating,
+      is_participating: props.is_participating
     });
     setDetailsOpen(true);
   };
@@ -176,8 +176,8 @@ export default function Dashboard() {
       text: "Meus eventos",
       click: () => {
         setFilterMyEvents((prev) => !prev);
-      },
-    },
+      }
+    }
   };
 
   return (
@@ -186,7 +186,7 @@ export default function Dashboard() {
       <div className="container py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-            Meus Workshops
+            Workshops
           </h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={loadEvents} disabled={loading} className="gap-1">
@@ -213,18 +213,18 @@ export default function Dashboard() {
             dayMaxEvents={2}
             aspectRatio={1.0}
             customButtons={customButtons}
-            headerToolbar={isMobile
-              ? { left: "title", center: "", right: "" }
-              : { left: "prev,next", center: "title", right: "filterMeus" }
+            headerToolbar={isMobile ?
+            { left: "title", center: "", right: "" } :
+            { left: "prev,next", center: "title", right: "filterMeus" }
             }
-            footerToolbar={isMobile
-              ? { left: "prev,next today", right: "filterMeus" }
-              : { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
+            footerToolbar={isMobile ?
+            { left: "prev,next today", right: "filterMeus" } :
+            { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
             height="auto"
             contentHeight="auto"
-            handleWindowResize={true}
-          />
+            handleWindowResize={true} />
+          
         </div>
       </div>
 
@@ -234,8 +234,8 @@ export default function Dashboard() {
         onClose={() => setDetailsOpen(false)}
         event={selectedEvent}
         onEventDeleted={loadEvents}
-        onParticipationChanged={loadEvents}
-      />
-    </div>
-  );
+        onParticipationChanged={loadEvents} />
+      
+    </div>);
+
 }
