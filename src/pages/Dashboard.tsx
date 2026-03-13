@@ -39,6 +39,11 @@ export default function Dashboard() {
   const [filterMyEvents, setFilterMyEvents] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const handleDatesSet = useCallback((arg: any) => {
+    setCurrentDate(arg.start);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
