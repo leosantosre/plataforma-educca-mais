@@ -253,6 +253,44 @@ export default function Profile() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card className="border-destructive/30">
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-medium text-destructive mb-2">Zona de perigo</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ao encerrar sua conta, todos os seus dados serão permanentemente removidos. Esta ação não pode ser desfeita.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Encerrar minha conta
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja encerrar sua conta?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação é irreversível. Todos os seus dados, eventos e publicações serão permanentemente removidos.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? "Encerrando..." : "Sim, encerrar conta"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
