@@ -208,7 +208,7 @@ export default function Dashboard() {
 
         <div className="rounded-xl border bg-card p-2 sm:p-4 shadow-card overflow-x-auto">
           {isMobile && (
-            <p className="font-serif text-center text-base font-semibold text-foreground mb-2">
+            <p className="font-serif text-center text-base font-semibold text-foreground mb-1">
               {format(currentDate, "dd/MM/yyyy")}
             </p>
           )}
