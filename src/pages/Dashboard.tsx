@@ -214,11 +214,11 @@ export default function Dashboard() {
             aspectRatio={1.0}
             customButtons={customButtons}
             headerToolbar={isMobile ?
-            { left: "title", center: "", right: "" } :
+            { left: "prev,next today", center: "", right: "filterMeus" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
-            { left: "prev,next today", right: "filterMeus" } :
+            false :
             { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
             height="auto"
