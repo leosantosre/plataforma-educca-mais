@@ -225,9 +225,10 @@ export default function Dashboard() {
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
-            { left: "", center: "title", right: "" } :
+            false :
             { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
+            datesSet={handleDatesSet}
             height="auto"
             contentHeight="auto"
             handleWindowResize={true} />
