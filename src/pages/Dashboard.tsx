@@ -215,11 +215,11 @@ export default function Dashboard() {
             customButtons={customButtons}
             titleFormat={isMobile ? { day: '2-digit', month: '2-digit', year: 'numeric' } : undefined}
             headerToolbar={isMobile ?
-            { left: "prev,next today", center: "title", right: "filterMeus" } :
+            { left: "prev,next today", center: "", right: "filterMeus" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
-            false :
+            { left: "", center: "title", right: "" } :
             { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
             height="auto"
