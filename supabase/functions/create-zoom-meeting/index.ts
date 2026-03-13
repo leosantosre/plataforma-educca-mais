@@ -67,6 +67,32 @@ async function createZoomMeeting(
   return await res.json();
 }
 
+function generateOccurrences(
+  startTime: string,
+  endTime: string,
+  recurrence: string | undefined
+): Array<{ start: Date; end: Date }> {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const durationMs = end.getTime() - start.getTime();
+
+  if (!recurrence || recurrence === "none") {
+    return [{ start, end }];
+  }
+
+  const occurrences: Array<{ start: Date; end: Date }> = [];
+  const maxCount = recurrence === "daily" ? 15 : 4;
+  const intervalMs = recurrence === "daily" ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+
+  for (let i = 0; i < maxCount; i++) {
+    const occStart = new Date(start.getTime() + i * intervalMs);
+    const occEnd = new Date(occStart.getTime() + durationMs);
+    occurrences.push({ start: occStart, end: occEnd });
+  }
+
+  return occurrences;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -96,7 +122,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { title, description, start_time, end_time } = await req.json();
+    const { title, description, start_time, end_time, recurrence } = await req.json();
 
     if (!title || !start_time || !end_time) {
       return new Response(
@@ -105,50 +131,80 @@ Deno.serve(async (req) => {
       );
     }
 
-    const startDate = new Date(start_time);
-    const endDate = new Date(end_time);
-    const durationMinutes = Math.max(
-      30,
-      Math.round((endDate.getTime() - startDate.getTime()) / 60000)
-    );
-
-    console.log("Creating Zoom meeting:", { title, start_time: startDate.toISOString(), duration: durationMinutes });
-
-    const accessToken = await getZoomAccessToken();
-    const meeting = await createZoomMeeting(
-      accessToken,
-      title,
-      startDate.toISOString(),
-      durationMinutes
-    );
-
-    console.log("Zoom meeting created:", meeting.id);
-
-    const { data: event, error: insertError } = await supabase
-      .from("events")
-      .insert({
-        title,
-        description: description || null,
-        zoom_link: meeting.join_url,
-        start_time: startDate.toISOString(),
-        end_time: endDate.toISOString(),
-        user_id: user.id,
-      })
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("DB insert error:", insertError.message);
+    // Validate start_time is not in the past
+    if (new Date(start_time) < new Date()) {
       return new Response(
-        JSON.stringify({ error: "Failed to save event: " + insertError.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Start time cannot be in the past" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Event saved:", event.id);
+    // Validate recurrence
+    if (recurrence && !["daily", "weekly"].includes(recurrence)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid recurrence type" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const occurrences = generateOccurrences(start_time, end_time, recurrence);
+    const accessToken = await getZoomAccessToken();
+    const createdEvents = [];
+
+    for (let i = 0; i < occurrences.length; i++) {
+      const occ = occurrences[i];
+      const durationMinutes = Math.max(
+        30,
+        Math.round((occ.end.getTime() - occ.start.getTime()) / 60000)
+      );
+
+      const occTitle = occurrences.length > 1 ? `${title} (${i + 1}/${occurrences.length})` : title;
+
+      console.log(`Creating Zoom meeting ${i + 1}/${occurrences.length}:`, {
+        title: occTitle,
+        start_time: occ.start.toISOString(),
+        duration: durationMinutes,
+      });
+
+      const meeting = await createZoomMeeting(
+        accessToken,
+        occTitle,
+        occ.start.toISOString(),
+        durationMinutes
+      );
+
+      console.log("Zoom meeting created:", meeting.id);
+
+      const { data: event, error: insertError } = await supabase
+        .from("events")
+        .insert({
+          title: occTitle,
+          description: description || null,
+          zoom_link: meeting.join_url,
+          start_time: occ.start.toISOString(),
+          end_time: occ.end.toISOString(),
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("DB insert error:", insertError.message);
+        return new Response(
+          JSON.stringify({ error: "Failed to save event: " + insertError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log("Event saved:", event.id);
+      createdEvents.push({ event, zoom_join_url: meeting.join_url, zoom_start_url: meeting.start_url });
+    }
 
     return new Response(
-      JSON.stringify({ event, zoom_join_url: meeting.join_url, zoom_start_url: meeting.start_url }),
+      JSON.stringify({
+        events: createdEvents,
+        events_created: createdEvents.length,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
