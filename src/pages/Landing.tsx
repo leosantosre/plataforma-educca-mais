@@ -61,7 +61,7 @@ export default function Landing() {
               para educadores
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              Crie e gerencie reuniões via Zoom, organize seus eventos em um calendário interativo
+              Crie e gerencie reuniões por videoconferência, organize seus eventos em um calendário interativo
               e conecte-se com outros professores na plataforma <strong>Educca+</strong>.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
