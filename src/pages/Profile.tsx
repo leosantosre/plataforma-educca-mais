@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Save, User, GraduationCap, FileText } from "lucide-react";
+import { ProfileWorkshops } from "@/components/profile/ProfileWorkshops";
 
 const EDUCATION_LEVELS = [
   "Educação Infantil",
