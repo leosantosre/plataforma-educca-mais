@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Save, User, GraduationCap, FileText } from "lucide-react";
+import { ProfileWorkshops } from "@/components/profile/ProfileWorkshops";
 
 const EDUCATION_LEVELS = [
   "Educação Infantil",
@@ -124,7 +125,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="container max-w-2xl py-10">
+        <main className="container max-w-2xl py-10 space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center gap-4">
               <Avatar className="h-16 w-16">
@@ -155,6 +156,8 @@ export default function Profile() {
               )}
             </CardContent>
           </Card>
+
+          <ProfileWorkshops profileUserId={viewingUserId!} />
         </main>
       </div>
     );
