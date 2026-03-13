@@ -123,34 +123,23 @@
 
   /* Mobile: compact toolbar and calendar */
   @media (max-width: 640px) {
-    .fc {
-      display: flex;
-      flex-direction: column;
-    }
     .fc .fc-header-toolbar {
-      order: 1;
-    }
-    .fc .fc-footer-toolbar {
-      order: 2;
-      margin-top: 0.25rem !important;
-      margin-bottom: 0.5rem !important;
-    }
-    .fc .fc-view-harness {
-      order: 3;
-    }
-    .fc .fc-toolbar {
-      flex-direction: row;
       flex-wrap: wrap;
       gap: 0.25rem;
-      justify-content: center;
+      justify-content: space-between;
     }
-    .fc .fc-toolbar-chunk {
+    .fc .fc-header-toolbar .fc-toolbar-chunk {
       display: flex;
       align-items: center;
     }
+    .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.25rem;
+    }
     .fc .fc-toolbar-title {
       font-size: 0.9rem !important;
-      width: 100%;
       text-align: center;
     }
     .fc .fc-button {

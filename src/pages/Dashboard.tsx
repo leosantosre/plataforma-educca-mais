@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { format } from "date-fns";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -38,6 +39,11 @@ export default function Dashboard() {
   const [filterMyEvents, setFilterMyEvents] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const handleDatesSet = useCallback((arg: any) => {
+    setCurrentDate(arg.start);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -215,13 +221,14 @@ export default function Dashboard() {
             customButtons={customButtons}
             titleFormat={isMobile ? { day: '2-digit', month: '2-digit', year: 'numeric' } : undefined}
             headerToolbar={isMobile ?
-            { left: "prev,next today", center: "", right: "filterMeus" } :
+            { left: "prev,next today", center: "title", right: "filterMeus" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
-            { left: "", center: "title", right: "" } :
+            false :
             { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
+            datesSet={handleDatesSet}
             height="auto"
             contentHeight="auto"
             handleWindowResize={true} />
