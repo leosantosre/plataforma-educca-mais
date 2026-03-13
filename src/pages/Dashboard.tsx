@@ -207,11 +207,6 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border bg-card p-2 sm:p-4 shadow-card overflow-x-auto">
-          {isMobile && (
-            <p className="font-serif text-center text-sm font-semibold text-foreground mb-2 mt-1">
-              {format(currentDate, "dd/MM/yyyy")}
-            </p>
-          )}
           <FullCalendar
             key={isMobile ? "mobile" : "desktop"}
             ref={calendarRef}
