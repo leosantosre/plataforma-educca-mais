@@ -32,11 +32,13 @@ interface EventDetailsModalProps {
 
 export function EventDetailsModal({ open, onClose, event, onEventDeleted, onParticipationChanged }: EventDetailsModalProps) {
   const { user } = useAuth();
+  const { adminMode } = useAdmin();
   const [joining, setJoining] = useState(false);
 
   if (!event) return null;
 
   const isOwner = user?.id === event.user_id;
+  const canDelete = isOwner || adminMode;
 
   const handleDelete = async () => {
     if (!confirm("Tem certeza que deseja deletar este evento?")) return;
