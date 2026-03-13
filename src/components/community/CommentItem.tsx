@@ -102,7 +102,7 @@ export function CommentItem({ comment, postId, onCommentChanged, isReply = false
                 Responder
               </Button>
             )}
-            {user?.id === comment.user_id && (
+            {(user?.id === comment.user_id || adminMode) && (
               <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive" onClick={handleDelete}>
                 <Trash2 className="h-3 w-3 mr-1" />
                 Deletar

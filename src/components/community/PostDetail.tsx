@@ -185,7 +185,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
             </div>
             <p className="mt-4 text-foreground whitespace-pre-wrap break-words">{post.content}</p>
           </div>
-          {user?.id === post.user_id && (
+          {(user?.id === post.user_id || adminMode) && (
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={handleDeletePost}>
               <Trash2 className="h-4 w-4" />
             </Button>
