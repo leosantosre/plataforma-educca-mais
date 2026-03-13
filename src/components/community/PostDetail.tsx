@@ -197,7 +197,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
           {totalComments} comentário{totalComments !== 1 ? "s" : ""}
         </h2>
 
-        <div className="flex flex-col sm:flex-row gap-2 mb-6">
+        <div className="flex flex-col gap-2 mb-6">
           <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
