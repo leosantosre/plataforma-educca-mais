@@ -197,7 +197,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
           {totalComments} comentário{totalComments !== 1 ? "s" : ""}
         </h2>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 mb-6">
           <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -206,7 +206,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
             maxLength={2000}
             className="text-sm"
           />
-          <Button onClick={handleAddComment} disabled={submitting || !newComment.trim()} className="self-end">
+          <Button onClick={handleAddComment} disabled={submitting || !newComment.trim()} className="self-start sm:self-end">
             {submitting ? "..." : "Comentar"}
           </Button>
         </div>
