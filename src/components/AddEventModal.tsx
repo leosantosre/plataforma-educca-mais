@@ -123,7 +123,7 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Novo Workshop</DialogTitle>
+          <DialogTitle className="font-serif text-xl">Novo evento</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
