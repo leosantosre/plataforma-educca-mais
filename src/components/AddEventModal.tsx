@@ -88,7 +88,7 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
               <Input id="end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-4 sm:flex-row">
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Criando..." : "Criar Workshop"}
