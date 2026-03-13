@@ -44,6 +44,7 @@ export default function Profile() {
   const [educationLevels, setEducationLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!viewingUserId) return;
