@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, User, Menu, X } from "lucide-react";
+import { LogOut, Calendar, Users, User, Menu, X, Shield, ShieldOff } from "lucide-react";
+import { useAdmin } from "@/contexts/AdminContext";
 
 import { NotificationBell } from "@/components/NotificationBell";
 import {
