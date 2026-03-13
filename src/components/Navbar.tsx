@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Calendar, Users, User, Menu, X } from "lucide-react";
-import logoSvg from "@/assets/logo.svg";
+
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
