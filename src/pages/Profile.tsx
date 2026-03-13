@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Save, User, GraduationCap, FileText } from "lucide-react";
+import { Save, User, GraduationCap, FileText, Trash2 } from "lucide-react";
 import { ProfileWorkshops } from "@/components/profile/ProfileWorkshops";
 
 const EDUCATION_LEVELS = [
@@ -33,6 +34,7 @@ interface ProfileData {
 export default function Profile() {
   const { user } = useAuth();
   const { userId } = useParams<{ userId?: string }>();
+  const navigate = useNavigate();
   const viewingUserId = userId || user?.id;
   const isOwnProfile = !userId || userId === user?.id;
 
@@ -42,6 +44,7 @@ export default function Profile() {
   const [educationLevels, setEducationLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!viewingUserId) return;
@@ -106,6 +109,24 @@ export default function Profile() {
       toast.error("Erro ao salvar perfil.");
     } else {
       toast.success("Perfil atualizado com sucesso!");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) {
+        toast.error("Erro ao encerrar conta.");
+        setDeleting(false);
+        return;
+      }
+      toast.success("Conta encerrada com sucesso.");
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch {
+      toast.error("Erro ao encerrar conta.");
+      setDeleting(false);
     }
   };
 
@@ -230,6 +251,44 @@ export default function Profile() {
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-destructive/30">
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-medium text-destructive mb-2">Zona de perigo</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ao encerrar sua conta, todos os seus dados serão permanentemente removidos. Esta ação não pode ser desfeita.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Encerrar minha conta
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja encerrar sua conta?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação é irreversível. Todos os seus dados, eventos e publicações serão permanentemente removidos.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? "Encerrando..." : "Sim, encerrar conta"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       </main>
