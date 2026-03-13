@@ -57,6 +57,16 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           {user ? (
             <div className="flex items-center gap-1">
+              {isAdmin && (
+                <button
+                  onClick={toggleAdminMode}
+                  className={`p-2 rounded-full transition-colors ${adminMode ? "bg-destructive/10 text-destructive" : "hover:bg-accent text-muted-foreground"}`}
+                  aria-label="Modo admin"
+                  title={adminMode ? "Desativar modo admin" : "Ativar modo admin"}
+                >
+                  {adminMode ? <Shield className="h-5 w-5" /> : <ShieldOff className="h-5 w-5" />}
+                </button>
+              )}
               <NotificationBell />
 
               {/* Mobile hamburger */}
