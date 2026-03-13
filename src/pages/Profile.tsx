@@ -112,6 +112,24 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) {
+        toast.error("Erro ao encerrar conta.");
+        setDeleting(false);
+        return;
+      }
+      toast.success("Conta encerrada com sucesso.");
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch {
+      toast.error("Erro ao encerrar conta.");
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
