@@ -214,7 +214,7 @@ export default function Dashboard() {
             aspectRatio={1.0}
             customButtons={customButtons}
             headerToolbar={isMobile ?
-            { left: "prev,next today", center: "", right: "filterMeus" } :
+            { left: "prev,next today", center: "title", right: "filterMeus" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
