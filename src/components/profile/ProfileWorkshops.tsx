@@ -220,7 +220,7 @@ export function ProfileWorkshops({ profileUserId }: ProfileWorkshopsProps) {
       {past.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Workshops Realizados</CardTitle>
+            <CardTitle className="text-lg">Workshops realizados</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {past.map((e) => renderEventCard(e, false))}
