@@ -27,7 +27,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <GraduationCap className="h-7 w-7 text-primary" />
+          <img src={logoSvg} alt="Educca+" className="h-8 w-8" />
           <span className="font-serif text-xl font-bold text-foreground">Educca<span className="text-primary">+</span></span>
         </Link>
 
