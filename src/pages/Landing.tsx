@@ -1,9 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Calendar, Users, Video, ArrowRight, BookOpen, Shield, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const features = [
   {
@@ -39,12 +41,35 @@ const features = [
 ];
 
 export default function Landing() {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail } = useAuth();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailLoading, setEmailLoading] = useState(false);
 
   useEffect(() => {
     if (user) navigate("/dashboard");
   }, [user, navigate]);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError(null);
+
+    if (!email || !password) {
+      setEmailError("Preencha e-mail e senha para entrar.");
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      await signInWithEmail(email, password);
+    } catch (err: any) {
+      setEmailError(err?.message || "Não foi possível entrar com e-mail e senha.");
+    } finally {
+      setEmailLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,24 +79,102 @@ export default function Landing() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 landing-gradient opacity-[0.04]" />
         <div className="container relative py-24 md:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl animate-fade-up">
-              A plataforma de{" "}
-              <span className="text-primary">workshops</span>{" "}
-              para educadores
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              Crie e gerencie reuniões por videoconferência, organize seus eventos em um calendário interativo
-              e conecte-se com outros professores na plataforma <strong>Educca+</strong>.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-              <Button size="lg" className="text-base px-8 gap-2" onClick={signInWithGoogle}>
-                Começar Agora
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="lg" className="text-base px-8" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}>
-                Saiba Mais
-              </Button>
+          <div className="mx-auto max-w-5xl grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start">
+            <div className="text-center lg:text-left">
+              <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl animate-fade-up">
+                A plataforma de{" "}
+                <span className="text-primary">workshops</span>{" "}
+                para educadores
+              </h1>
+              <p
+                className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 animate-fade-up"
+                style={{ animationDelay: "0.1s" }}
+              >
+                Crie e gerencie reuniões por videoconferência, organize seus eventos em um calendário interativo
+                e conecte-se com outros professores na plataforma <strong>Educca+</strong>.
+              </p>
+              <div
+                className="mt-10 flex flex-col sm:flex-row items-center lg:items-start lg:justify-start justify-center gap-4 animate-fade-up"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <Button size="lg" className="text-base px-8 gap-2" onClick={signInWithGoogle}>
+                  Entrar com Google
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="text-base px-8"
+                  onClick={() =>
+                    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  Saiba Mais
+                </Button>
+              </div>
+            </div>
+
+            <div className="w-full max-w-md mx-auto lg:mx-0 bg-card/80 border rounded-2xl shadow-card backdrop-blur-sm p-6 animate-fade-up lg:mt-4">
+              <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
+                Entrar com e-mail e senha
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Use seu e-mail institucional para acessar a plataforma ou entre rapidamente com Google.
+              </p>
+              <form className="space-y-4" onSubmit={handleEmailLogin}>
+                <div className="space-y-1">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="voce@escola.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                {emailError && (
+                  <p className="text-sm text-destructive">
+                    {emailError}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full mt-2"
+                  disabled={emailLoading}
+                >
+                  {emailLoading ? "Entrando..." : "Entrar com e-mail"}
+                </Button>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      ou continue com
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={signInWithGoogle}
+                >
+                  Entrar com Google
+                </Button>
+              </form>
             </div>
           </div>
         </div>
