@@ -67,10 +67,17 @@ async function createZoomMeeting(
   return await res.json();
 }
 
+function isWeekend(date: Date): boolean {
+  const day = date.getUTCDay();
+  return day === 0 || day === 6;
+}
+
 function generateOccurrences(
   startTime: string,
   endTime: string,
-  recurrence: string | undefined
+  recurrence: string | undefined,
+  count: number,
+  includeWeekends: boolean
 ): Array<{ start: Date; end: Date }> {
   const start = new Date(startTime);
   const end = new Date(endTime);
@@ -81,13 +88,24 @@ function generateOccurrences(
   }
 
   const occurrences: Array<{ start: Date; end: Date }> = [];
-  const maxCount = recurrence === "daily" ? 15 : 4;
-  const intervalMs = recurrence === "daily" ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
 
-  for (let i = 0; i < maxCount; i++) {
-    const occStart = new Date(start.getTime() + i * intervalMs);
-    const occEnd = new Date(occStart.getTime() + durationMs);
-    occurrences.push({ start: occStart, end: occEnd });
+  if (recurrence === "weekly") {
+    for (let i = 0; i < count; i++) {
+      const occStart = new Date(start.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+      occurrences.push({ start: occStart, end: new Date(occStart.getTime() + durationMs) });
+    }
+  } else {
+    // daily
+    let dayOffset = 0;
+    while (occurrences.length < count) {
+      const occStart = new Date(start.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+      if (includeWeekends || !isWeekend(occStart)) {
+        occurrences.push({ start: occStart, end: new Date(occStart.getTime() + durationMs) });
+      }
+      dayOffset++;
+      // Safety: prevent infinite loop
+      if (dayOffset > 100) break;
+    }
   }
 
   return occurrences;
@@ -122,7 +140,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { title, description, start_time, end_time, recurrence } = await req.json();
+    const { title, description, start_time, end_time, recurrence, recurrence_count, include_weekends } = await req.json();
 
     if (!title || !start_time || !end_time) {
       return new Response(
@@ -131,7 +149,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate start_time is not in the past
     if (new Date(start_time) < new Date()) {
       return new Response(
         JSON.stringify({ error: "Start time cannot be in the past" }),
@@ -139,7 +156,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate recurrence
     if (recurrence && !["daily", "weekly"].includes(recurrence)) {
       return new Response(
         JSON.stringify({ error: "Invalid recurrence type" }),
@@ -147,7 +163,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    const occurrences = generateOccurrences(start_time, end_time, recurrence);
+    const maxAllowed = recurrence === "daily" ? 15 : 4;
+    const count = recurrence ? Math.min(Math.max(recurrence_count || 2, 2), maxAllowed) : 1;
+    const weekends = include_weekends !== false;
+
+    const occurrences = generateOccurrences(start_time, end_time, recurrence, count, weekends);
     const accessToken = await getZoomAccessToken();
     const createdEvents = [];
 
