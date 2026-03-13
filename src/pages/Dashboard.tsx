@@ -207,6 +207,11 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border bg-card p-2 sm:p-4 shadow-card overflow-x-auto">
+          {isMobile && (
+            <p className="font-serif text-center text-sm font-semibold text-foreground mb-2">
+              {format(currentDate, "dd/MM/yyyy")}
+            </p>
+          )}
           <FullCalendar
             key={isMobile ? "mobile" : "desktop"}
             ref={calendarRef}
@@ -221,11 +226,11 @@ export default function Dashboard() {
             customButtons={customButtons}
             titleFormat={isMobile ? { day: '2-digit', month: '2-digit', year: 'numeric' } : undefined}
             headerToolbar={isMobile ?
-            { left: "prev,next today", center: "title", right: "filterMeus" } :
+            { left: "", center: "", right: "" } :
             { left: "prev,next", center: "title", right: "filterMeus" }
             }
             footerToolbar={isMobile ?
-            false :
+            { left: "prev,next today", right: "filterMeus" } :
             { left: "today", right: "dayGridMonth,dayGridWeek,dayGridDay" }
             }
             datesSet={handleDatesSet}
