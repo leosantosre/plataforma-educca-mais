@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, MessageSquare } from "lucide-react";
@@ -24,6 +25,7 @@ interface PostDetailProps {
 
 export function PostDetail({ postId, onBack }: PostDetailProps) {
   const { user } = useAuth();
+  const { adminMode } = useAdmin();
   const [post, setPost] = useState<PostData | null>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -183,7 +185,7 @@ export function PostDetail({ postId, onBack }: PostDetailProps) {
             </div>
             <p className="mt-4 text-foreground whitespace-pre-wrap break-words">{post.content}</p>
           </div>
-          {user?.id === post.user_id && (
+          {(user?.id === post.user_id || adminMode) && (
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={handleDeletePost}>
               <Trash2 className="h-4 w-4" />
             </Button>

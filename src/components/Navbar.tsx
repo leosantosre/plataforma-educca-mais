@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, User, Menu, X } from "lucide-react";
+import { LogOut, Calendar, Users, User, Menu, X, Shield, ShieldOff } from "lucide-react";
+import { useAdmin } from "@/contexts/AdminContext";
 
 import { NotificationBell } from "@/components/NotificationBell";
 import {
@@ -15,6 +16,7 @@ import {
 
 export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
+  const { isAdmin, adminMode, toggleAdminMode } = useAdmin();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -55,6 +57,16 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           {user ? (
             <div className="flex items-center gap-1">
+              {isAdmin && (
+                <button
+                  onClick={toggleAdminMode}
+                  className={`p-2 rounded-full transition-colors ${adminMode ? "bg-destructive/10 text-destructive" : "hover:bg-accent text-muted-foreground"}`}
+                  aria-label="Modo admin"
+                  title={adminMode ? "Desativar modo admin" : "Ativar modo admin"}
+                >
+                  {adminMode ? <Shield className="h-5 w-5" /> : <ShieldOff className="h-5 w-5" />}
+                </button>
+              )}
               <NotificationBell />
 
               {/* Mobile hamburger */}

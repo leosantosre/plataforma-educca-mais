@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MessageSquare, Trash2 } from "lucide-react";
@@ -31,6 +32,7 @@ interface CommentItemProps {
 
 export function CommentItem({ comment, postId, onCommentChanged, isReply = false }: CommentItemProps) {
   const { user } = useAuth();
+  const { adminMode } = useAdmin();
   const [replying, setReplying] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -100,7 +102,7 @@ export function CommentItem({ comment, postId, onCommentChanged, isReply = false
                 Responder
               </Button>
             )}
-            {user?.id === comment.user_id && (
+            {(user?.id === comment.user_id || adminMode) && (
               <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive" onClick={handleDelete}>
                 <Trash2 className="h-3 w-3 mr-1" />
                 Deletar
