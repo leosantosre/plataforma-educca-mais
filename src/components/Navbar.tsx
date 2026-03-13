@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, GraduationCap, Users, User, Menu, X } from "lucide-react";
+import { LogOut, Calendar, Users, User, Menu, X } from "lucide-react";
+import logoSvg from "@/assets/logo.svg";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
@@ -26,7 +27,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <GraduationCap className="h-7 w-7 text-primary" />
+          <img src={logoSvg} alt="Educca+" className="h-8 w-8" />
           <span className="font-serif text-xl font-bold text-foreground">Educca<span className="text-primary">+</span></span>
         </Link>
 
