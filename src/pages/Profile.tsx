@@ -34,6 +34,7 @@ interface ProfileData {
 export default function Profile() {
   const { user } = useAuth();
   const { userId } = useParams<{ userId?: string }>();
+  const navigate = useNavigate();
   const viewingUserId = userId || user?.id;
   const isOwnProfile = !userId || userId === user?.id;
 
