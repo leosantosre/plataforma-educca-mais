@@ -45,6 +45,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   useEffect(() => {
     if (!viewingUserId) return;
@@ -63,10 +64,22 @@ export default function Profile() {
         const levels = rawLevel ? rawLevel.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
         setProfile({ full_name: d.full_name, avatar_url: d.avatar_url, description: d.description, education_level: d.education_level });
         if (isOwnProfile) {
-          setFullName(d.full_name || "");
+          const metaFullName =
+            d.full_name ||
+            (user?.user_metadata as any)?.full_name ||
+            (user?.user_metadata as any)?.name ||
+            "";
+          setFullName(metaFullName);
           setDescription(d.description || "");
           setEducationLevels(levels);
         }
+      } else if (isOwnProfile && user) {
+        // Perfil ainda não existe no banco: usar nome vindo do provedor (Google) ou cadastro
+        const metaFullName =
+          (user.user_metadata as any)?.full_name ||
+          (user.user_metadata as any)?.name ||
+          "";
+        setFullName(metaFullName);
       }
       setLoading(false);
     };
@@ -96,12 +109,15 @@ export default function Profile() {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({
-        full_name: trimmedName,
-        description: trimmedDesc,
-        education_level: educationLevels.length > 0 ? educationLevels.join(", ") : null,
-      } as any)
-      .eq("id", user.id);
+      .upsert(
+        {
+          id: user.id,
+          full_name: trimmedName,
+          description: trimmedDesc,
+          education_level: educationLevels.length > 0 ? educationLevels.join(", ") : null,
+        } as any,
+        { onConflict: "id" }
+      );
 
     setSaving(false);
 
@@ -127,6 +143,79 @@ export default function Profile() {
     } catch {
       toast.error("Erro ao encerrar conta.");
       setDeleting(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 2MB.");
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${Date.now()}.${ext}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        toast.error("Erro ao enviar imagem: " + uploadError.message);
+        return;
+      }
+
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 dias
+
+      if (signedError || !signedData?.signedUrl) {
+        toast.error("Erro ao gerar URL da foto de perfil.");
+        return;
+      }
+
+      const signedUrl = signedData.signedUrl;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            avatar_url: signedUrl,
+          } as any,
+          { onConflict: "id" }
+        );
+
+      if (profileError) {
+        toast.error("Erro ao salvar foto de perfil: " + profileError.message);
+        return;
+      }
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { avatar_url: signedUrl },
+      });
+
+      if (authError) {
+        toast.error("Erro ao atualizar dados de usuário: " + authError.message);
+        return;
+      }
+
+      setProfile((prev) =>
+        prev ? { ...prev, avatar_url: signedUrl } : { full_name, avatar_url: signedUrl, description, education_level: educationLevels.join(", ") || null }
+      );
+
+      toast.success("Foto de perfil atualizada!");
+    } catch (err: any) {
+      toast.error("Erro ao atualizar foto de perfil: " + (err.message || "Erro desconhecido"));
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -190,15 +279,32 @@ export default function Profile() {
       <main className="container max-w-2xl py-10 space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback>
-                <User className="h-8 w-8" />
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              <label htmlFor="avatar-upload" className="cursor-pointer group block">
+                <Avatar className="h-16 w-16 ring-2 ring-primary/10 group-hover:ring-primary/40 transition">
+                  <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url || undefined} />
+                  <AvatarFallback>
+                    <User className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition text-[11px] text-white">
+                  {avatarUploading ? "Enviando..." : "Trocar foto"}
+                </div>
+              </label>
+            </div>
             <div>
               <CardTitle className="text-2xl">Meu Perfil</CardTitle>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
+              {fullName && (
+                <p className="text-sm text-foreground mt-1">{fullName}</p>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-6">

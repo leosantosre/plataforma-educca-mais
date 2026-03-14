@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Calendar, Users, User, Menu, X, Shield, ShieldOff } from "lucide-react";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -18,11 +18,23 @@ export function Navbar() {
   const { user, signInWithGoogle, signOut } = useAuth();
   const { isAdmin, adminMode, toggleAdminMode } = useAdmin();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleLoginClick = () => {
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById("auth-card")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else {
+      document.getElementById("auth-card")?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -108,8 +120,8 @@ export function Navbar() {
               </DropdownMenu>
             </div>
           ) : (
-            <Button onClick={signInWithGoogle} size="sm">
-              Entrar com Google
+            <Button onClick={handleLoginClick} size="sm">
+              Entrar
             </Button>
           )}
         </div>

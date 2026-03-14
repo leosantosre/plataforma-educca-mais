@@ -72,6 +72,13 @@ function isWeekend(date: Date): boolean {
   return day === 0 || day === 6;
 }
 
+function truncateToMinute(date: Date): Date {
+  const d = new Date(date);
+  d.setSeconds(0, 0);
+  d.setMilliseconds(0);
+  return d;
+}
+
 function generateOccurrences(
   startTime: string,
   endTime: string,
@@ -149,7 +156,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (new Date(start_time) < new Date()) {
+    const startDate = truncateToMinute(new Date(start_time));
+    const now = truncateToMinute(new Date());
+
+    if (startDate < now) {
       return new Response(
         JSON.stringify({ error: "Start time cannot be in the past" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

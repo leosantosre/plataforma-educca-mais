@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,22 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
   const parsedStart = start ? parseDisplayDateTime(start) : null;
   const parsedEnd = end ? parseDisplayDateTime(end) : null;
 
+  useEffect(() => {
+    if (open && !start) {
+      const now = new Date();
+      now.setSeconds(0, 0);
+      const minutes = now.getMinutes();
+      const roundedMinutes = Math.ceil(minutes / 5) * 5;
+      now.setMinutes(roundedMinutes, 0, 0);
+
+      const initialStart = now;
+      const initialEnd = new Date(initialStart.getTime() + 60 * 60 * 1000);
+
+      setStart(formatDisplayDateTime(initialStart));
+      setEnd(formatDisplayDateTime(initialEnd));
+    }
+  }, [open, start]);
+
   const handleStartChange = (value: string) => {
     setStart(value);
     const startDate = parseDisplayDateTime(value);
@@ -110,6 +126,8 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
 
     const startDate = parseDisplayDateTime(start);
     const endDate = parseDisplayDateTime(end);
+    const now = new Date();
+    now.setSeconds(0, 0);
 
     if (!startDate) {
       toast.error("Data de início inválida. Use o formato DD/MM/AAAA HH:MM.");
@@ -126,7 +144,7 @@ export function AddEventModal({ open, onClose, onEventAdded }: AddEventModalProp
       return;
     }
 
-    if (startDate < new Date()) {
+    if (startDate < now) {
       toast.error("A data de início não pode ser anterior à data atual.");
       return;
     }

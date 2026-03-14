@@ -41,33 +41,92 @@ const features = [
 ];
 
 export default function Landing() {
-  const { user, signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (user) navigate("/dashboard");
   }, [user, navigate]);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError(null);
+    setInfoMessage(null);
 
-    if (!email || !password) {
-      setEmailError("Preencha e-mail e senha para entrar.");
-      return;
+    if (mode === "login") {
+      if (!email || !password) {
+        setEmailError("Preencha e-mail e senha para entrar.");
+        return;
+      }
+    } else {
+      if (!fullName.trim()) {
+        setEmailError("Preencha seu nome completo.");
+        return;
+      }
+      if (!email || !password || !confirmPassword) {
+        setEmailError("Preencha todos os campos para criar sua conta.");
+        return;
+      }
+      if (password.length < 6) {
+        setEmailError("A senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setEmailError("As senhas não conferem.");
+        return;
+      }
     }
 
     setEmailLoading(true);
     try {
-      await signInWithEmail(email, password);
+      if (mode === "login") {
+        await signInWithEmail(email, password);
+      } else {
+        await signUpWithEmail(email, password, fullName.trim());
+        setInfoMessage("Conta criada! Verifique seu e-mail para confirmar o acesso.");
+      }
     } catch (err: any) {
-      setEmailError(err?.message || "Não foi possível entrar com e-mail e senha.");
+      setEmailError(
+        err?.message ||
+          (mode === "login"
+            ? "Não foi possível entrar com e-mail e senha."
+            : "Não foi possível criar sua conta.")
+      );
     } finally {
       setEmailLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setEmailError(null);
+    setInfoMessage(null);
+
+    if (!email) {
+      setEmailError("Informe seu e-mail para redefinir a senha.");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await resetPassword(email);
+      setInfoMessage(
+        "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha."
+      );
+    } catch (err: any) {
+      setEmailError(
+        err?.message || "Não foi possível enviar o e-mail de redefinição de senha."
+      );
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -114,14 +173,32 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="w-full max-w-md mx-auto lg:mx-0 bg-card/80 border rounded-2xl shadow-card backdrop-blur-sm p-6 animate-fade-up lg:mt-4">
+            <div
+              className="w-full max-w-md mx-auto lg:mx-0 bg-card/80 border rounded-2xl shadow-card backdrop-blur-sm p-6 animate-fade-up lg:mt-4"
+              id="auth-card"
+            >
               <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
-                Entrar com e-mail e senha
+                {mode === "login" ? "Entrar com e-mail e senha" : "Criar conta com e-mail e senha"}
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Use seu e-mail institucional para acessar a plataforma ou entre rapidamente com Google.
+                {mode === "login"
+                  ? "Use seu e-mail institucional para acessar a plataforma ou entre rapidamente com Google."
+                  : "Crie sua conta usando e-mail e senha. Você também pode continuar usando o login com Google."}
               </p>
-              <form className="space-y-4" onSubmit={handleEmailLogin}>
+              <form className="space-y-4" onSubmit={handleEmailAuth}>
+                {mode === "signup" && (
+                  <div className="space-y-1">
+                    <Label htmlFor="fullName">Nome completo</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Seu nome completo"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+                )}
                 <div className="space-y-1">
                   <Label htmlFor="email">E-mail</Label>
                   <Input
@@ -138,15 +215,45 @@ export default function Landing() {
                   <Input
                     id="password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
                     placeholder="Sua senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+                {mode === "signup" && (
+                  <div className="space-y-1">
+                    <Label htmlFor="confirm-password">Confirmar senha</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Repita sua senha"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                )}
+                {mode === "login" && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={handleResetPassword}
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+                    </button>
+                  </div>
+                )}
                 {emailError && (
                   <p className="text-sm text-destructive">
                     {emailError}
+                  </p>
+                )}
+                {infoMessage && !emailError && (
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                    {infoMessage}
                   </p>
                 )}
                 <Button
@@ -154,8 +261,39 @@ export default function Landing() {
                   className="w-full mt-2"
                   disabled={emailLoading}
                 >
-                  {emailLoading ? "Entrando..." : "Entrar com e-mail"}
+                  {emailLoading
+                    ? mode === "login"
+                      ? "Entrando..."
+                      : "Criando conta..."
+                    : mode === "login"
+                      ? "Entrar com e-mail"
+                      : "Criar conta"}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  {mode === "login" ? (
+                    <>
+                      Não tem conta?{" "}
+                      <button
+                        type="button"
+                        className="text-primary hover:underline font-medium"
+                        onClick={() => setMode("signup")}
+                      >
+                        Criar conta
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      Já tem conta?{" "}
+                      <button
+                        type="button"
+                        className="text-primary hover:underline font-medium"
+                        onClick={() => setMode("login")}
+                      >
+                        Entrar
+                      </button>
+                    </>
+                  )}
+                </p>
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-border" />

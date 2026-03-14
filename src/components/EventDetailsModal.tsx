@@ -96,15 +96,23 @@ export function EventDetailsModal({ open, onClose, event, onEventDeleted, onPart
           <DialogTitle className="font-serif text-xl">{event.title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          {event.organizer_name && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>Organizador: <UserLink userId={event.user_id} name={event.organizer_name} className="font-semibold text-foreground" /></span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-4 w-4" />
+            <span>
+              Organizador:{" "}
+              <UserLink
+                userId={event.user_id}
+                name={event.organizer_name}
+                className="font-semibold text-foreground"
+              />
+            </span>
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span><strong className="text-foreground">{event.participant_count}</strong> participante{event.participant_count !== 1 ? "s" : ""}</span>
+            <span>
+              <strong className="text-foreground">{event.participant_count}</strong>{" "}
+              participante{event.participant_count !== 1 ? "s" : ""}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
