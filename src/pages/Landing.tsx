@@ -3,7 +3,15 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Users, Video, ArrowRight, BookOpen, Shield, Zap } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  Video,
+  ArrowRight,
+  BookOpen,
+  Shield,
+  Zap,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -11,37 +19,49 @@ const features = [
   {
     icon: Calendar,
     title: "Calendário Interativo",
-    description: "Visualize todos os workshops em um calendário completo. Organize e gerencie seus eventos com facilidade.",
+    description:
+      "Visualize todos os workshops em um calendário completo. Organize e gerencie seus eventos com facilidade.",
   },
   {
     icon: Video,
     title: "Videoconferência Integrada",
-    description: "Adicione links de videoconferência diretamente nos seus eventos. Seus participantes terão acesso fácil às reuniões.",
+    description:
+      "Adicione links de videoconferência diretamente nos seus eventos. Seus participantes terão acesso fácil às reuniões.",
   },
   {
     icon: Users,
     title: "Comunidade de Professores",
-    description: "Conecte-se com outros educadores. Participe de workshops e amplie sua rede de conhecimento.",
+    description:
+      "Conecte-se com outros educadores. Participe de workshops e amplie sua rede de conhecimento.",
   },
   {
     icon: BookOpen,
     title: "Gestão de Eventos",
-    description: "Crie, edite e delete seus workshops com total controle. Gerencie tudo de forma simples e intuitiva.",
+    description:
+      "Crie, edite e delete seus workshops com total controle. Gerencie tudo de forma simples e intuitiva.",
   },
   {
     icon: Shield,
     title: "Acesso Seguro",
-    description: "Login rápido e seguro com sua conta Google. Seus dados protegidos com autenticação moderna.",
+    description:
+      "Login rápido e seguro com sua conta Google. Seus dados protegidos com autenticação moderna.",
   },
   {
     icon: Zap,
     title: "Rápido e Responsivo",
-    description: "Plataforma moderna e ágil que funciona em qualquer dispositivo, desktop ou mobile.",
+    description:
+      "Plataforma moderna e ágil que funciona em qualquer dispositivo, desktop ou mobile.",
   },
 ];
 
 export default function Landing() {
-  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
+  const {
+    user,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+  } = useAuth();
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -92,14 +112,16 @@ export default function Landing() {
         await signInWithEmail(email, password);
       } else {
         await signUpWithEmail(email, password, fullName.trim());
-        setInfoMessage("Conta criada! Verifique seu e-mail para confirmar o acesso.");
+        setInfoMessage(
+          "Conta criada! Verifique seu e-mail para confirmar o acesso.",
+        );
       }
     } catch (err: any) {
       setEmailError(
         err?.message ||
           (mode === "login"
             ? "Não foi possível entrar com e-mail e senha."
-            : "Não foi possível criar sua conta.")
+            : "Não foi possível criar sua conta."),
       );
     } finally {
       setEmailLoading(false);
@@ -119,11 +141,12 @@ export default function Landing() {
     try {
       await resetPassword(email);
       setInfoMessage(
-        "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha."
+        "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.",
       );
     } catch (err: any) {
       setEmailError(
-        err?.message || "Não foi possível enviar o e-mail de redefinição de senha."
+        err?.message ||
+          "Não foi possível enviar o e-mail de redefinição de senha.",
       );
     } finally {
       setResetLoading(false);
@@ -141,22 +164,26 @@ export default function Landing() {
           <div className="mx-auto max-w-5xl grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start">
             <div className="text-center lg:text-left">
               <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl animate-fade-up">
-                A plataforma de{" "}
-                <span className="text-primary">workshops</span>{" "}
+                A plataforma de <span className="text-primary">workshops</span>{" "}
                 para educadores
               </h1>
               <p
                 className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 animate-fade-up"
                 style={{ animationDelay: "0.1s" }}
               >
-                Crie e gerencie reuniões por videoconferência, organize seus eventos em um calendário interativo
-                e conecte-se com outros professores na plataforma <strong>Educca+</strong>.
+                Crie e gerencie reuniões por videoconferência, organize seus
+                eventos em um calendário interativo e conecte-se com outros
+                professores na plataforma <strong>Educca+</strong>.
               </p>
               <div
                 className="mt-10 flex flex-col sm:flex-row items-center lg:items-start lg:justify-start justify-center gap-4 animate-fade-up"
                 style={{ animationDelay: "0.2s" }}
               >
-                <Button size="lg" className="text-base px-8 gap-2" onClick={signInWithGoogle}>
+                <Button
+                  size="lg"
+                  className="text-base px-8 gap-2"
+                  onClick={signInWithGoogle}
+                >
                   Entrar com Google
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -165,7 +192,9 @@ export default function Landing() {
                   size="lg"
                   className="text-base px-8"
                   onClick={() =>
-                    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
+                    document
+                      .getElementById("features")
+                      ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
                   Saiba Mais
@@ -178,7 +207,9 @@ export default function Landing() {
               id="auth-card"
             >
               <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
-                {mode === "login" ? "Entrar com e-mail e senha" : "Criar conta com e-mail e senha"}
+                {mode === "login"
+                  ? "Entrar com e-mail e senha"
+                  : "Criar conta com e-mail e senha"}
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
                 {mode === "login"
@@ -205,7 +236,7 @@ export default function Landing() {
                     id="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="voce@escola.com"
+                    placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -215,7 +246,9 @@ export default function Landing() {
                   <Input
                     id="password"
                     type="password"
-                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    autoComplete={
+                      mode === "login" ? "current-password" : "new-password"
+                    }
                     placeholder="Sua senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -247,9 +280,7 @@ export default function Landing() {
                   </div>
                 )}
                 {emailError && (
-                  <p className="text-sm text-destructive">
-                    {emailError}
-                  </p>
+                  <p className="text-sm text-destructive">{emailError}</p>
                 )}
                 {infoMessage && !emailError && (
                   <p className="text-sm text-emerald-600 dark:text-emerald-400">
@@ -325,8 +356,9 @@ export default function Landing() {
             <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
               Tudo que você precisa para seus workshops
             </h2>
-            <p className="mt-4 text-muted-foreground text-lg max-w-xl mx-auto">
-              Ferramentas poderosas e simples para professores que querem ir além.
+            <p className="mt-4 text-muted-foreground text-lg max-w-2xl mx-auto">
+              Ferramentas poderosas e simples para professores que querem ir
+              além.
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -339,8 +371,12 @@ export default function Landing() {
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   <f.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-foreground">{f.title}</h3>
-                <p className="mt-2 text-muted-foreground leading-relaxed">{f.description}</p>
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  {f.title}
+                </h3>
+                <p className="mt-2 text-muted-foreground leading-relaxed">
+                  {f.description}
+                </p>
               </div>
             ))}
           </div>
@@ -355,7 +391,8 @@ export default function Landing() {
               Pronto para começar?
             </h2>
             <p className="mt-4 text-primary-foreground/80 text-lg max-w-lg mx-auto">
-              Junte-se à comunidade de professores que já utilizam o Educca+ para organizar seus workshops.
+              Junte-se à comunidade de professores que já utilizam o Educca+
+              para organizar seus workshops.
             </p>
             <Button
               size="lg"
